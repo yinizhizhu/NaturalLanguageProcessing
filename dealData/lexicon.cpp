@@ -11,30 +11,33 @@ lex::lex()
 		cout << "Cannot open the lexicon.txt!" << endl;
 		return;
 	}
-	int i = 0;
+	int i = 0, tag = 0;
 	char line[N], tmp[N], *move;
-	while (!in.eof())
+	while (true)
 	{
 		memset(line, 0, N);
 		in.getline(line, N - 1);
 		move = line;
 
-		move += getWord(move, tmp);
-		words.push_back(word());
-		//if (i >= 12459 && i < 12479)
-		//	cout << line << ": " << tmp << " ";
-		words[i].token = string(tmp);
-		while (*move != '\0')
+		tag = getWord(move, tmp);
+		if (strlen(tmp) > 0)
 		{
-			move += getWord(move, tmp);
-			words[i].pro.push_back(string(tmp));
-			//if (i >= 12459 && i < 12479)
-			//	cout << tmp << " ";
+			move += tag;
+			words.push_back(word());
+			words[i].token = string(tmp);
 		}
+		if (tag == 0)
+			break;
+		while (true)
+		{
+			tag = getWord(move, tmp);
+			if (strlen(tmp) > 0)
+				words[i].pro.push_back(string(tmp));
 
-		//if (i >= 12459 && i < 12479)
-		//	cout << endl;
-
+			if (tag == 0)
+				break;
+			move += tag;
+		}
 		words[i].lenPro = words[i].pro.size();
 		i++;
 	}
@@ -56,10 +59,11 @@ int lex::getWord(char* line, char* tmp)
 	{
 		switch (line[i])
 		{
-		case '0':
+		case '\0':
+			tmp[i] = '\0';
+			return 0;
 		case ' ':
 		case 9:
-		case '\n':
 			tmp[i] = '\0';
 			return i + 1;
 		default:
@@ -113,6 +117,21 @@ int lex::inLexicon(string& a)
 		if (words[i].token == a)
 			return i;
 	return -1;
+}
+
+void lex::testLexicon()
+{
+	cout << "Wrong part of data is here:" << endl;
+	for (int i = 0; i < lenWords; i++)
+	{
+		if (words[i].token.size() != (words[i].lenPro * 2))
+		{
+			cout << words[i].token << ": " << words[i].token.size() << ">>" << words[i].lenPro << ">>";
+			showPro(i);
+			cout << endl;
+		}
+	}
+	return;
 }
 
 bool cmpAsc(const word& s1, const word& s2)	//for sort

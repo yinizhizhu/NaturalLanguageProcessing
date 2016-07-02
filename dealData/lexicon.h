@@ -37,6 +37,7 @@ public:
 	void showPro(int n);
 	void showWords(int m, int n);
 	int inLexicon(string& a);	//return the index of the string 'a'
+	void testLexicon();
 private:
 	int lenWords;
 	vector<word> words;
