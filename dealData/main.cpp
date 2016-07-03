@@ -26,5 +26,7 @@ int main()
 //	d.showGbTable(0, 10);
 	nineSix e;
 	e.showSymbol();
+	e.showRefer();
+	cout << e.getSerialOne('a') << endl;
 	return 0;
 }
