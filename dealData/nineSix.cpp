@@ -8,6 +8,8 @@ nineSix::nineSix()
 	day = 1;
 	getRefer();
 	getSymbol();
+	a.sortByLenDec();
+	//a.showIndexDec();
 	return;
 }
 //Done
@@ -52,39 +54,45 @@ void nineSix::getSymbol()
 	return;
 }
 
-void nineSix::readNext()
+void nineSix::control()
 {
-	string fileName = "96" + refer[month - 1] + refer[day - 1];
-	ifstream in(fileName);
-	if (!in.is_open())
+	if (!endTag)
 	{
-		cout << "Cannot open the " << fileName << "\"" << endl;
-		return;
-	}
-	int len, lastStart = 0;
-	string last = "";
-	char dataArea[MAXL];
-	while (!in.eof())
-	{
-		container.clear();
-		memset(dataArea, MAXL, sizeof(char));
-		in.read(dataArea, MAXL - 2);		//the '\n' needs a tag, and the end of the string also needs the tag.
+		string fileName = "96/96" + refer[month - 1] + refer[day - 1] + ".TXT";
+		ifstream in(fileName);
+		if (!in.is_open())
+		{
+			cout << "Cannot open the " << fileName << "\"" << endl;
+			return;
+		}
+		int len, lastStart = 0;
+		string last = "";
+		char dataArea[MAXL];
+		while (!in.eof())
+		{
+			container.clear();
+			memset(dataArea, 0, MAXL*sizeof(char));
+			in.read(dataArea, MAXL - 2);		//the '\n' needs a tag, and the end of the string also needs the tag.
+			preHandle(dataArea);
+			cout << "1: " << dataArea << endl;
+			//getContent();
 
-		preHandle(dataArea);
-		fMM();
-		//bMM();
-		//bM();
-		getContent();
+			//container[0] = last + container[0]; //add the forward last one into the this part
 
-		container[0] = last + container[0]; //add the forward last one into the this part
-		last = container[container.size() - 1];
-		len = last.size();
-		if (len == 1)
-			last = "";
-		else
-			last = last.erase(len - 1, 1);
+			//showContainer();
+			//fMM();
+			//bMM();
+			//bM();
+
+			//last = container[container.size() - 1];
+			//len = last.size();
+			//if (len == 1)
+			//	last = "";
+			//else
+			//	last = last.erase(len - 1, 1);
+		}
+		getNextState();
 	}
-	getNextState();
 	return;
 }
 //Done
@@ -121,20 +129,27 @@ void nineSix::preHandle(char* dataArea)
 	int j, step;
 	char tmp[6];
 	unsigned int i = 0, len = strlen(dataArea) + 1;
-	dataArea[len-1] = 255;
-	for (; i < len;)
+	cout << "Right?" << endl;
+	dataArea[len - 1] = char(255);
+	cout << "Right!" << endl;
+	for (; i < len-1;)
 	{
 		step = getSerialOne(dataArea[i]);
+		cout << step;
 		if (step == 0)
 		{
 			if (dataArea[i] == '\n')
-				dataArea[i] = 254;
+				dataArea[i] = char(254);
+			else
+			{
+				position.push(dataArea + i);//store the head pointer of each part
+				dataArea[i] = '\0';
+			}
 			i++;
 		}
-		else if (step == 8)
-			break;
 		else
 		{
+			cout << "You are here" << endl;
 			for (j = 0; j < step; j++)
 				tmp[j] = dataArea[i + j];
 			tmp[j] = '\0';
@@ -173,7 +188,7 @@ void nineSix::handleSymbolPos(char* source, char* eachPart)
 	int len = strlen(source);
 	for (; i < len; i++)
 	{
-		if (source[i] != 254)
+		if (source[i] ^ char(254))
 			eachPart[j++] = source[i];
 	}
 	return;
@@ -191,9 +206,49 @@ int nineSix::getSerialOne(char byte)
 	return counter;
 }
 
+void nineSix::matchMax(string& eachPart)
+{
+	return;
+}
+
 void nineSix::fMM()
 {
-	//cut up each part in container, and store the result of handle
+	unsigned int i, len = container.size(), wordLen;
+	int j, step, tail = a.indexDec.size();
+	string eachPart, tmp;
+	map<string, int >::iterator l_it;
+	for (i = 0; i < (len - 1); i++)
+	{
+		eachPart = container[i];
+		//matchMax(eachPart);
+		while (eachPart.size() != 0)
+		{
+			if ((eachPart.size() / 2) >= a.words[0].lenPro)
+				step = 0;
+			else
+				step = a.words[0].lenPro - (eachPart.size() / 2);
+			while (step < tail)
+			{
+				for (j = a.indexDec[step]; j < a.indexDec[step + 1]; j++)
+				{
+					wordLen = a.words[j].token.size();
+					tmp = eachPart.substr(0, wordLen * 2);
+					if (a.words[j].token == tmp)
+					{
+						eachPart.erase(0, wordLen * 2);
+						l_it = wordsCounter.find(tmp);
+						if (l_it != wordsCounter.end())
+							l_it->second++;
+						else
+							wordsCounter.insert(pair<string, int>(tmp, 1));
+						goto END;
+					}
+				}
+			}
+		END:
+			;
+		}
+	}
 	return;
 }
 
@@ -226,5 +281,35 @@ void nineSix::showRefer()			//for test
 	for (; i < len; i++)
 		cout << refer[i] << ", ";
 	cout << refer[i] << endl;
+	return;
+}
+
+void nineSix::showPosition()
+{
+	cout << endl << "The position is:" << endl;
+	while (!position.empty())
+	{
+		cout << position.front() << "||";
+		position.pop();
+	}
+	return;
+}
+
+void nineSix::showContainer()
+{
+	unsigned int i, len = container.size();
+	cout << endl << "The container is:" << endl;
+	for (i = 0; i < (len - 1); i++)
+		cout << container[i] << ", ";
+	cout << container[i] << endl;
+	return;
+}
+
+void nineSix::showWordsCounter()
+{
+	map<string, int>::iterator tmp;
+	cout << endl << "The wordsCounter is:" << endl;
+	for (tmp = wordsCounter.begin(); tmp != wordsCounter.end(); tmp++)
+		cout << tmp->first << ", " << tmp->second << endl;
 	return;
 }

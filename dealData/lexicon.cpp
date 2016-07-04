@@ -83,6 +83,21 @@ void lex::sortByLenAsc()
 {
 	//sort(words.begin(), words.end(), less<word>());
 	sort(words.begin(), words.end(), cmpAsc);
+	if (indexAsc.empty())
+	{
+		unsigned int i, tmp;
+		tmp = words[0].lenPro;
+		indexAsc.push_back(0);
+		for (i = 1; i < words.size(); i++)
+		{
+			if (tmp ^ words[i].lenPro)
+			{
+				tmp = words[i].lenPro;
+				indexAsc.push_back(i);
+			}
+		}
+		indexAsc.push_back(i);
+	}
 	return;
 }
 
@@ -90,12 +105,27 @@ void lex::sortByLenDec()
 {
 	//sort(words.begin(), words.end(), greater<word>());
 	sort(words.begin(), words.end(), cmpDec);
+	if (indexDec.empty())
+	{
+		unsigned int i, tmp;
+		tmp = words[0].lenPro;
+		indexDec.push_back(0);
+		for (i = 1; i < words.size(); i++)
+		{
+			if (tmp ^ words[i].lenPro)
+			{
+				tmp = words[i].lenPro;
+				indexDec.push_back(i);
+			}
+		}
+		indexDec.push_back(i);
+	}
 	return;
 }
 
 void lex::showPro(int n)
 {
-	for (int j = 0; j < words[n].lenPro; j++)
+	for (unsigned int j = 0; j < words[n].lenPro; j++)
 		cout << words[n].pro[j]<<" ";
 	return;
 }
@@ -111,9 +141,27 @@ void lex::showWords(int m, int n)
 	return;
 }
 
+void lex::showIndexAsc()
+{
+	unsigned int i, len = indexAsc.size();
+	for (i = 0; i < (len - 1); i++)
+		cout << indexAsc[i] << ", ";
+	cout << indexAsc[i] << endl;
+	return;
+}
+
+void lex::showIndexDec()
+{
+	unsigned int i, len = indexDec.size();
+	for (i = 0; i < (len - 1); i++)
+		cout << indexDec[i] << ", ";
+	cout << indexDec[i] << endl;
+	return;
+}
+
 int lex::inLexicon(string& a)
 {
-	for (int i = 0; i<lenWords; i++)
+	for (unsigned int i = 0; i<lenWords; i++)
 		if (words[i].token == a)
 			return i;
 	return -1;
@@ -122,7 +170,7 @@ int lex::inLexicon(string& a)
 void lex::testLexicon()
 {
 	cout << "Wrong part of data is here:" << endl;
-	for (int i = 0; i < lenWords; i++)
+	for (unsigned int i = 0; i < lenWords; i++)
 	{
 		if (words[i].token.size() != (words[i].lenPro * 2))
 		{

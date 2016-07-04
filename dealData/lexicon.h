@@ -12,7 +12,7 @@
 typedef struct word
 {
 	string token;
-	int lenPro;
+	unsigned int lenPro;
 	vector<string> pro;
 	bool operator<(const word& rhs) const	//for asc
 	{
@@ -29,18 +29,22 @@ class lex
 public:
 	lex();
 	~lex();
+	unsigned int lenWords;
+	vector<word> words;
+	vector<int> indexDec;
+	vector<int> indexAsc;
 	void clean(char* line);
 	int getWord(char* line, char* tmp);
 	int getLenWords();
+	word getWordPos(int pos);
 	void sortByLenAsc();
 	void sortByLenDec();
 	void showPro(int n);
 	void showWords(int m, int n);
+	void showIndexDec();
+	void showIndexAsc();
 	int inLexicon(string& a);	//return the index of the string 'a'
 	void testLexicon();
-private:
-	int lenWords;
-	vector<word> words;
 };
 
 #endif
